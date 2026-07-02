@@ -450,6 +450,7 @@
 
 	<audio id="bgmLove" src="bgm_love.mp3" loop preload="auto"></audio>
 	<audio id="bgmHorror" src="bgm_horror.mp3" loop preload="auto"></audio>
+	<audio id="bgmBio" src="bgm_bio.mp3" loop preload="auto"></audio>
 	<audio id="sfxSting" src="sfx_sting.mp3" preload="auto"></audio>
 
 	<script>
@@ -475,12 +476,20 @@
 		const sfxSting = document.getElementById("sfxSting");
 
 		// ===== 音频 =====
-		function playLove() { bgmLove.volume = 0.5; bgmLove.play().catch(() => {}); }
+		function playLove() { bgmBio.pause(); bgmLove.volume = 0.5; bgmLove.play().catch(() => {}); }
 		function toHorror() {
+			bgmBio.pause();
 			bgmLove.pause();
 			bgmHorror.volume = 0.7;
 			bgmHorror.currentTime = 0;
 			bgmHorror.play().catch(() => {});
+		}
+		// 人物志专属BGM：打开时播放，关闭界面不停，被其他BGM打断才停
+		function playBio() {
+			bgmLove.pause();
+			bgmHorror.pause();
+			bgmBio.volume = 0.45;
+			bgmBio.play().catch(() => {});
 		}
 		function sting() { try { sfxSting.currentTime = 0; sfxSting.play().catch(() => {}); } catch (e) {} }
 
@@ -1101,6 +1110,8 @@
 				'<button class="bio-close" id="bioClose">合 上</button>' +
 				'</div>';
 			document.body.appendChild(ov);
+			initAudioCtx();
+			playBio();
 			document.getElementById("bioClose").onclick = () => ov.remove();
 			ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
 		}
