@@ -454,7 +454,7 @@
 			return imp;
 		}
 
-		// 用 Web Audio 播放：狠降速降调压出低沉消沉拖腔 + 暗调低通 + 强混响 + 延迟回声
+		// 用 Web Audio 播放：暗调低通 + 混响（无回声）
 		function playBufferCreepy(buffer) {
 			const now = audioCtx.currentTime;
 			const src = audioCtx.createBufferSource();
@@ -467,16 +467,13 @@
 			lp.frequency.value = 2200;
 
 			const dry = audioCtx.createGain(); dry.gain.value = 1.2;    // 干声（主音量 > BGM 0.5）
-			const wet = audioCtx.createGain(); wet.gain.value = 1.3;    // 混响湿声（调大，确保听得见）
+			const wet = audioCtx.createGain(); wet.gain.value = 1.3;    // 混响湿声
 			const conv = audioCtx.createConvolver(); conv.buffer = makeImpulse(3.0, 2.0); // 更长更缓的尾巴
-			const delay = audioCtx.createDelay(); delay.delayTime.value = 0.38; // 回声间隔
-			const fb = audioCtx.createGain(); fb.gain.value = 0.42;     // 回声反馈（更明显的一声声唤名）
 
-			// src → 低通 → (干声 + 混响 + 回声) → 输出
+			// src → 低通 → (干声 + 混响) → 输出
 			src.connect(lp);
 			lp.connect(dry).connect(audioCtx.destination);
 			lp.connect(conv); conv.connect(wet).connect(audioCtx.destination);
-			lp.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet);
 			src.start(now);
 		}
 
