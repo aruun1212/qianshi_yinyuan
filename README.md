@@ -4,6 +4,8 @@
 
 零框架、零构建、零外部库——一个 `index.html` 打开即玩。
 
+**▶ 在线体验：https://qianshiyinyuan.netlify.app/**
+
 > ⚠️ 含惊吓（jump scare）与恐怖元素，心脏不适者慎玩。仅供娱乐。
 
 ## 版权 / License
