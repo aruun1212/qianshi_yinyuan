@@ -1,0 +1,9 @@
+{
+  "name": "qianshi-yinyuan-tts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serverless TTS endpoint for 测试前世姻缘 (Edge neural voice, no API key)",
+  "dependencies": {
+    "msedge-tts": "^1.3.6"
+  }
+}

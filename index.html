@@ -435,60 +435,95 @@
 			});
 		}
 
-		// ===== 语音念名（Web Speech，压低男声 + 多层递减回声模拟混响低语）=====
+		// ===== 语音念名 =====
+		// TTS 端点：默认同源(/api/tts，部署到 Vercel 时用这个)。
+		// 若你坚持用 github.io 链接分发，把这里改成绝对地址，例如：
+		//   const TTS_ENDPOINT = "https://你的项目.vercel.app/api/tts";
+		const TTS_ENDPOINT = "/api/tts";
+		const TTS_VOICE = "zh-CN-YunxiNeural"; // 微软神经男声（云希）；可换 zh-CN-YunjianNeural(云健,更浑厚)
+
+		// 生成混响脉冲响应（噪声衰减），给铜镜/冥婚的空旷回响
+		function makeImpulse(duration, decay) {
+			const rate = audioCtx.sampleRate;
+			const len = Math.floor(rate * duration);
+			const imp = audioCtx.createBuffer(2, len, rate);
+			for (let c = 0; c < 2; c++) {
+				const ch = imp.getChannelData(c);
+				for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+			}
+			return imp;
+		}
+
+		// 用 Web Audio 播放：降速降调(playbackRate)压出低沉拖沓感 + 混响 + 延迟回声
+		function playBufferCreepy(buffer) {
+			const now = audioCtx.currentTime;
+			const src = audioCtx.createBufferSource();
+			src.buffer = buffer;
+			src.playbackRate.value = 0.82; // <1 = 更低沉更慢，鬼气拖腔
+
+			const dry = audioCtx.createGain(); dry.gain.value = 1.25;   // 干声，主音量(>BGM 0.5)
+			const wet = audioCtx.createGain(); wet.gain.value = 0.85;   // 混响湿声
+			const conv = audioCtx.createConvolver(); conv.buffer = makeImpulse(2.6, 3.2);
+			const delay = audioCtx.createDelay(); delay.delayTime.value = 0.34; // 回声间隔
+			const fb = audioCtx.createGain(); fb.gain.value = 0.32;      // 回声反馈衰减
+
+			src.connect(dry).connect(audioCtx.destination);
+			src.connect(conv); conv.connect(wet).connect(audioCtx.destination);
+			src.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet);
+			src.start(now);
+		}
+
+		// 主入口：先请求云端 AI 语音；失败(离线/微信/后端没部署)则回退浏览器合成
+		async function speakName(name) {
+			if (!name) return;
+			initAudioCtx();
+			if (!audioCtx) { fallbackSpeak(name); return; }
+			try {
+				const url = TTS_ENDPOINT + "?voice=" + encodeURIComponent(TTS_VOICE) +
+					"&text=" + encodeURIComponent(name);
+				const resp = await fetch(url);
+				if (!resp.ok) throw new Error("TTS HTTP " + resp.status);
+				const arr = await resp.arrayBuffer();
+				const buf = await audioCtx.decodeAudioData(arr);
+				playBufferCreepy(buf);
+			} catch (e) {
+				console.log("[云端TTS失败，回退浏览器语音]", e);
+				fallbackSpeak(name);
+			}
+		}
+
+		// ===== 兜底：浏览器自带 Web Speech（压深成低沉鬼气嗓 + 递减回声）=====
 		function pickMaleVoice() {
 			if (!("speechSynthesis" in window)) return null;
 			const vs = speechSynthesis.getVoices();
 			if (!vs || !vs.length) return null;
-			// 优先中文男声（Chrome/Win 多半没有，命中则用）
 			let v = vs.find(x => /zh|cmn|Chinese/i.test(x.lang) &&
 				/(male|男|Yunxi|云希|Yunyang|云扬|Yunjian|云健|Yunye|云野|Kangkang|Kang)/i.test(x.name));
-			// 其次任意中文语音（配合极低 pitch 压成低沉男/非人嗓）
 			if (!v) v = vs.find(x => /zh|cmn/i.test(x.lang));
 			if (!v) v = vs.find(x => /(male|男)/i.test(x.name));
 			if (!v) v = vs[0];
 			return v;
 		}
-		// 念名字：极低 pitch 压出低沉失真男/鬼嗓 + 两层递减回声。音量1.0>BGM0.5
-		function speakName(name) {
-			if (!("speechSynthesis" in window) || !name) {
-				console.log("[speakName] 不支持语音或名字为空", name);
-				return;
-			}
+		function fallbackSpeak(name) {
+			if (!("speechSynthesis" in window) || !name) return;
 			const doSpeak = () => {
-				const vs = speechSynthesis.getVoices();
-				console.log("[speakName] 触发，语音数=" + (vs ? vs.length : 0));
-				if (vs && vs.length) console.log("[可用语音]", vs.map(v => v.name + " (" + v.lang + ")").join(" | "));
 				try { speechSynthesis.cancel(); } catch (e) {}
 				const voice = pickMaleVoice();
-				console.log("[选中语音]", voice ? voice.name : "无(用默认)");
 				const layers = [
-					{ rate: 0.72, pitch: 0.4, vol: 1.0 },  // 主声：压深成低沉鬼气嗓（跨浏览器稳）
-					{ rate: 0.62, pitch: 0.3, vol: 0.55 }, // 回声一
-					{ rate: 0.54, pitch: 0.2, vol: 0.30 }  // 回声二：气若游丝
+					{ rate: 0.72, pitch: 0.4, vol: 1.0 },
+					{ rate: 0.62, pitch: 0.3, vol: 0.55 },
+					{ rate: 0.54, pitch: 0.2, vol: 0.30 }
 				];
 				layers.forEach(L => {
 					const u = new SpeechSynthesisUtterance(name);
-					if (voice) {
-						u.voice = voice;
-						u.lang = voice.lang; // 用所选语音自身lang，避免Chrome按"zh-CN"重挑默认女声
-					} else {
-						u.lang = "zh-CN";
-					}
-					u.rate = L.rate;
-					u.pitch = L.pitch;
-					u.volume = L.vol;
+					if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = "zh-CN"; }
+					u.rate = L.rate; u.pitch = L.pitch; u.volume = L.vol;
 					speechSynthesis.speak(u);
 				});
 			};
 			const vs = speechSynthesis.getVoices();
-			if (!vs || !vs.length) {
-				console.log("[speakName] 语音尚未加载，等待 onvoiceschanged");
-				speechSynthesis.onvoiceschanged = doSpeak;
-				setTimeout(doSpeak, 250); // 兜底
-			} else {
-				doSpeak();
-			}
+			if (!vs || !vs.length) { speechSynthesis.onvoiceschanged = doSpeak; setTimeout(doSpeak, 250); }
+			else doSpeak();
 		}
 
 		// ===== 24小时窥视文案（t=时间标签会标红, s=正文）=====
