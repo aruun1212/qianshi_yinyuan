@@ -459,7 +459,7 @@
 			const now = audioCtx.currentTime;
 			const src = audioCtx.createBufferSource();
 			src.buffer = buffer;
-			src.playbackRate.value = 0.72; // 越小越低沉、越慢、越消沉拖沓
+			src.playbackRate.value = 1.0; // 1.0=原速原调（取消降调）；<1 会更低沉更慢
 
 			// 暗调低通：削高频=闷、沉、somber，并盖住TTS毛刺
 			const lp = audioCtx.createBiquadFilter();
