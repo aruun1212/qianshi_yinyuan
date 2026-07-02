@@ -319,6 +319,95 @@
 			font-size: clamp(18px, 5vw, 26px);
 			animation: floodIn 0.15s ease;
 		}
+
+		/* 人物志入口：通关后缓缓浮现 */
+		.bio-entry {
+			margin-top: 22px;
+			font-size: 13px;
+			letter-spacing: 3px;
+			color: #7a2020;
+			cursor: pointer;
+			opacity: 0;
+			border-top: 1px solid rgba(122, 32, 32, 0.2);
+			padding-top: 16px;
+			animation: bioFadeIn 4.5s ease 1.2s forwards;
+			transition: color 0.2s;
+		}
+		@media (hover: hover) {
+			.bio-entry:hover { color: #a52a2a; }
+		}
+		@keyframes bioFadeIn {
+			from { opacity: 0; }
+			to { opacity: 0.9; }
+		}
+
+		/* 人物志阅读浮层：泛黄纸卷 */
+		.bio-overlay {
+			position: fixed;
+			inset: 0;
+			z-index: 100001;
+			background: rgba(20, 12, 6, 0.75);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 16px;
+			animation: floodIn 0.4s ease;
+		}
+		.bio-scroll {
+			background: #f3e7cc;
+			background-image: linear-gradient(180deg, #f6ecd6, #ecdcbd);
+			max-width: 560px;
+			width: 100%;
+			max-height: 88vh;
+			overflow-y: auto;
+			border: 1px solid #b89a70;
+			border-radius: 8px;
+			padding: 34px 30px 26px;
+			box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+			color: #3a2e26;
+		}
+		.bio-title {
+			text-align: center;
+			font-size: 22px;
+			font-weight: bold;
+			color: #7a2020;
+			letter-spacing: 4px;
+			margin-bottom: 6px;
+		}
+		.bio-sub {
+			text-align: center;
+			font-size: 12px;
+			color: #a08a68;
+			letter-spacing: 2px;
+			margin-bottom: 22px;
+		}
+		.bio-body {
+			font-size: 15.5px;
+			line-height: 2.05;
+			letter-spacing: 0.5px;
+			text-align: justify;
+		}
+		.bio-body p { margin-bottom: 15px; }
+		.bio-body .turn {
+			color: #7a2020;
+			text-align: center;
+			letter-spacing: 2px;
+			font-size: 16px;
+			margin: 20px 0;
+		}
+		.bio-close {
+			display: block;
+			margin: 24px auto 0;
+			background: #7a2020;
+			color: #f7ecd8;
+			border: none;
+			border-radius: 6px;
+			padding: 9px 26px;
+			font-size: 14px;
+			letter-spacing: 3px;
+			cursor: pointer;
+			font-family: inherit;
+		}
 	</style>
 </head>
 <body>
@@ -948,7 +1037,8 @@
 					'<div class="start-title">测试前世姻缘</div>' +
 					'<div class="start-text">你又来了呢。\n\n他说过，\n你一定会回来的。</div>' +
 					'<button class="start-btn" id="openBtn">翻开姻缘簿</button>' +
-					'<div class="start-tip">※ 缘，是躲不掉的 ♡</div>';
+					'<div class="start-tip">※ 缘，是躲不掉的 ♡</div>' +
+					'<div class="bio-entry" id="bioEntry">阅 · 人物志 · 沈鹤川</div>';
 			} else {
 				modal.innerHTML =
 					'<div class="start-title">测试前世姻缘</div>' +
@@ -957,6 +1047,8 @@
 					'<div class="start-tip">※ 仅供娱乐，请放松心情作答 ♡</div>';
 			}
 			document.body.appendChild(modal);
+			const bioEntry = document.getElementById("bioEntry");
+			if (bioEntry) bioEntry.onclick = showBio;
 			document.getElementById("openBtn").onclick = () => {
 				modal.remove();
 				document.getElementById("authorLink").style.display = "none";
@@ -966,6 +1058,35 @@
 				step = 1;
 				render();
 			};
+		}
+
+		// 人物志 · 沈鹤川
+		function showBio() {
+			const ov = document.createElement("div");
+			ov.className = "bio-overlay";
+			ov.innerHTML =
+				'<div class="bio-scroll">' +
+				'<div class="bio-title">沈鹤川</div>' +
+				'<div class="bio-sub">人 物 志</div>' +
+				'<div class="bio-body">' +
+				'<p>西环的老人说，沈家三少是个痴人。</p>' +
+				'<p>沈家的事，没人说得清。只晓得那是前朝就有的世家，明朝的根，枝叶伸进这半世纪的政商两界，却又像浸在水底的影子，看得见，摸不着。偏是这样一个家族，出了位一等一娟秀的三少爷——眉眼清淡，肤色却白得没有一丝血气，白到近乎透明，像灯一照就要化了。都说沈家使尽了法子，请遍南北名医，也留不住他一分好颜色。他就这么成了个药罐子，一年比一年薄，像宣纸，像将尽的烛。</p>' +
+				'<p>他不住老宅，独自赁下西环那处跃层的公寓——恰在送亲必经的十字街口。常年闭门不见客。唯有楼下锣鼓一响，红轿子抬过长街，他才推开窗，畏畏缩缩探出半个身子来看。看完，便回屋去，一遍一遍念那新娘子的名字，一笔一笔抄那新娘子的名字，抄到手都抖了，直抄到下一顶花轿过街，才换一个名字，重新念起。</p>' +
+				'<p>街坊都避着他。谁家新过门的媳妇，被个素不相识的男人日日念着名字，纵他家业再大、生得再好，也是桩不吉利的事。他们不知道，那些名字，他抄进的是一本簿子；更不知道，那簿子上的红线，一根一根，都牵到了他自己身上。</p>' +
+				'<p class="turn">——他原是管姻缘的。</p>' +
+				'<p>近百年，这一带的喜脉坏了。拜金的、卖女的、冥婚的，一桩桩把好端端的红线拧成死结。那些看着风光的喜事，红绸底下压着什么，知情的不敢言，围观的领了红包、吃过喜宴，也懒得问。世家为着扶植门楣，指腹的、近亲的、强娶的、卖去做小的，样样都有。女子过了门，生下孩子，便算尽了用处；男人依旧在外头风流，她守着一间空屋过完一生。稍有不驯的，或无端暴毙于内室，或半夜被沉了江。嫁出去的女儿，泼出去的水，再没有人替她们说一句话。</p>' +
+				'<p>那些断在半路的红线，那些无处摆渡的魂，他便一根根接过来，续在自己身上。替她们念，替她们抄，替她们把没走完的路，一寸一寸走完。</p>' +
+				'<p>所以他才这样白，这样薄。背一个人的姻缘尚且沉重，何况一城的、百年的、残的破的、冤的屈的。</p>' +
+				'<p>他不恼。楼下又起了唢呐，他扶着窗棂站起来，极轻地，念出那顶新轿里的名字。像在应谁，又像在许谁一个迟到了很久的诺。</p>' +
+				'<p>——至于他从何处来，那本簿子究竟记到了哪一页，他背下的债几时才算还清……</p>' +
+				'<p>西环的老人只摇头。他们说，沈家三少是个痴人。</p>' +
+				'<p style="text-align:center;color:#7a2020;letter-spacing:2px;">痴人，不知道疼。</p>' +
+				'</div>' +
+				'<button class="bio-close" id="bioClose">合 上</button>' +
+				'</div>';
+			document.body.appendChild(ov);
+			document.getElementById("bioClose").onclick = () => ov.remove();
+			ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
 		}
 
 		// 首次开场绑定
