@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>测试前世姻缘</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: "STKaiti", "KaiTi", "楷体", "Songti SC", serif;
+		}
+
+		html, body {
+			width: 100%;
+			height: 100%;
+			min-height: 100vh;
+			background: #efe6d8;
+			background-image: radial-gradient(circle at 50% 30%, #f5eee1, #e3d5c0);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 12px;
+			color: #3a2e26;
+			overflow: hidden;
+		}
+
+		/* 开场弹窗 */
+		.start-modal {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: min(92vw, 360px);
+			background: #fbf6ec;
+			border: 1px solid #c9b79a;
+			border-radius: 10px;
+			z-index: 99999;
+			padding: 30px 24px;
+			text-align: center;
+			box-shadow: 0 8px 40px rgba(80, 50, 30, 0.18);
+		}
+
+		.start-title {
+			font-size: 24px;
+			font-weight: bold;
+			color: #7a2020;
+			letter-spacing: 4px;
+			margin-bottom: 18px;
+		}
+
+		.start-text {
+			font-size: 15px;
+			line-height: 2;
+			color: #4a3c30;
+			margin-bottom: 20px;
+			white-space: pre-line;
+		}
+
+		.start-btn {
+			background: #7a2020;
+			color: #f7ecd8;
+			border: none;
+			border-radius: 6px;
+			padding: 11px 30px;
+			font-size: 16px;
+			letter-spacing: 3px;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+		.start-btn:hover { background: #601818; }
+
+		.start-tip {
+			margin-top: 16px;
+			font-size: 11px;
+			color: #a08e78;
+			letter-spacing: 1px;
+		}
+
+		/* 作者角标 */
+		.author-link {
+			position: fixed;
+			right: 12px;
+			bottom: 10px;
+			z-index: 100000;
+			font-size: 11px;
+			color: rgba(122, 90, 60, 0.55);
+			text-decoration: none;
+			letter-spacing: 1px;
+			transition: color 0.2s;
+		}
+		.author-link:hover { color: #7a2020; }
+
+		/* 主卡片 */
+		.card {
+			background: #fbf6ec;
+			width: 100%;
+			max-width: 560px;
+			height: 100%;
+			max-height: 88vh;
+			padding: 30px 26px 24px;
+			border-radius: 10px;
+			border: 1px solid #d8c6a8;
+			box-shadow: 0 4px 30px rgba(90, 60, 30, 0.10);
+			position: relative;
+			z-index: 10;
+			display: none;
+			flex-direction: column;
+			overflow: hidden;
+		}
+
+		.progress {
+			text-align: center;
+			font-size: 12px;
+			color: #b09a7c;
+			letter-spacing: 2px;
+			margin-bottom: 20px;
+			flex-shrink: 0;
+			min-height: 16px;
+		}
+
+		.narr {
+			font-size: 18px;
+			line-height: 1.9;
+			color: #3a2e26;
+			margin-bottom: 22px;
+			flex-shrink: 0;
+			letter-spacing: 1px;
+		}
+		.narr .red { color: #9c1c1c; }
+		.narr .dim { color: #8a7a68; }
+
+		.opts {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			flex: 1;
+			overflow-y: auto;
+			padding-right: 4px;
+		}
+
+		.opt {
+			padding: 14px 16px;
+			border: 1px solid #d8c6a8;
+			border-radius: 7px;
+			cursor: pointer;
+			font-size: 16px;
+			background: #fffdf8;
+			transition: all 0.2s;
+			line-height: 1.4;
+			flex-shrink: 0;
+			letter-spacing: 1px;
+		}
+		.opt:hover { background: #f3e7d2; border-color: #b89a70; }
+		.opt.locked {
+			background: #efe6d8 !important;
+			color: #b0a48f !important;
+			cursor: not-allowed !important;
+			border-color: #e0d4bf !important;
+		}
+
+		.name-input {
+			font-size: 17px;
+			padding: 12px 14px;
+			border: 1px solid #c9b79a;
+			border-radius: 7px;
+			width: 100%;
+			background: #fffdf8;
+			text-align: center;
+			letter-spacing: 2px;
+			color: #3a2e26;
+			font-family: inherit;
+		}
+		.name-input:focus { outline: none; border-color: #7a2020; }
+
+		/* 恐怖遮罩：红烛暗底 */
+		.terror {
+			position: fixed;
+			inset: 0;
+			z-index: 9999;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			background: #0a0303;
+			background-image: radial-gradient(circle at 50% 45%, #3a0808 0%, #120303 60%, #000 100%);
+			color: #ff2b2b;
+			text-align: center;
+			padding: 24px;
+			overflow: hidden;
+		}
+
+		.terror-line {
+			writing-mode: vertical-rl;
+			font-size: clamp(20px, 6vw, 30px);
+			letter-spacing: 8px;
+			color: #d10000;
+			text-shadow: 0 0 6px #7a0000, 0 0 14px #4a0000;
+			font-weight: bold;
+			line-height: 1.8;
+			animation: bleed 2.2s ease forwards;
+		}
+		@keyframes bleed {
+			0% { color: #6a5040; text-shadow: none; }
+			100% { color: #d10000; text-shadow: 0 0 6px #7a0000, 0 0 16px #5a0000; }
+		}
+
+		.terror-say {
+			font-size: clamp(18px, 5vw, 24px);
+			color: #ff5252;
+			letter-spacing: 4px;
+			line-height: 2;
+			text-shadow: 0 0 8px #6a0000;
+			font-weight: bold;
+		}
+
+		/* 红盖头覆盖 */
+		.veil {
+			position: fixed;
+			inset: 0;
+			z-index: 99999;
+			background: #8a0000;
+			background-image: radial-gradient(circle at 50% 40%, #b81414, #6a0000 70%, #3a0000 100%);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			color: #ffd9d9;
+			text-align: center;
+			padding: 30px;
+			gap: 28px;
+		}
+		.veil-text {
+			font-size: clamp(18px, 5vw, 24px);
+			line-height: 2;
+			letter-spacing: 3px;
+			text-shadow: 0 0 10px #4a0000;
+			white-space: pre-line;
+		}
+		.veil-btn {
+			background: #f7d9d9;
+			color: #7a0000;
+			border: none;
+			padding: 10px 26px;
+			border-radius: 6px;
+			font-size: 16px;
+			letter-spacing: 3px;
+			cursor: pointer;
+			font-family: inherit;
+		}
+
+		/* 铜镜结局 */
+		.mirror {
+			position: fixed;
+			inset: 0;
+			z-index: 999999;
+			background: #000;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			color: #cfcfcf;
+			text-align: center;
+			padding: 30px;
+			gap: 26px;
+		}
+		.mirror-text {
+			font-size: clamp(18px, 5vw, 22px);
+			line-height: 2.1;
+			letter-spacing: 2px;
+			white-space: pre-line;
+		}
+
+		/* 满屏红字轰炸 */
+		.flood {
+			position: fixed;
+			inset: 0;
+			z-index: 99998;
+			background: #0a0303;
+			overflow: hidden;
+		}
+		.flood-line {
+			position: absolute;
+			color: #d10000;
+			font-weight: bold;
+			white-space: nowrap;
+			letter-spacing: 2px;
+			text-shadow: 0 0 6px #7a0000, 0 0 14px #4a0000;
+			transform: translate(-50%, -50%);
+			animation: floodIn 0.25s ease;
+			pointer-events: none;
+		}
+		@keyframes floodIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+		/* 整行依次落下（txt 逐行打字感）*/
+		.flood-col {
+			position: fixed;
+			inset: 0;
+			z-index: 99998;
+			background: #0a0303;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+			padding: 24px 20px;
+			gap: 6px;
+		}
+		.flood-row {
+			color: #d10000;
+			font-weight: bold;
+			letter-spacing: 2px;
+			white-space: nowrap;
+			text-shadow: 0 0 6px #7a0000, 0 0 14px #4a0000;
+			font-size: clamp(18px, 5vw, 26px);
+			animation: floodIn 0.15s ease;
+		}
+	</style>
+</head>
+<body>
+	<!-- 开场 -->
+	<div class="start-modal" id="startModal">
+		<div class="start-title">测试前世姻缘</div>
+		<div class="start-text">每个人的前世，都有一段没走完的缘。
+翻开你的姻缘簿，
+看看那个一直在等你的人，是谁。
+
+—— 据说，很准。</div>
+		<button class="start-btn" id="openBtn">翻开姻缘簿</button>
+		<div class="start-tip">※ 仅供娱乐，请放松心情作答 ♡</div>
+	</div>
+
+	<!-- 主卡片 -->
+	<div class="card" id="card">
+		<div class="progress" id="progress"></div>
+		<div class="narr" id="narr"></div>
+		<div class="opts" id="opts"></div>
+	</div>
+
+	<a class="author-link" id="authorLink" href="https://github.com/aruun1212" target="_blank" rel="noopener">@aruun1212</a>
+
+	<audio id="bgmLove" src="bgm_love.mp3" loop preload="auto"></audio>
+	<audio id="bgmHorror" src="bgm_horror.mp3" loop preload="auto"></audio>
+	<audio id="sfxSting" src="sfx_sting.mp3" preload="auto"></audio>
+
+	<script>
+		// ===== 状态 =====
+		const S = {
+			q1: null,   // 独处样子
+			q2: null,   // 前世身份
+			q3: null,   // 季节 0春1夏2秋3冬
+			q4: null,   // 那个人
+			q7: null,   // 誓言（0=非他不嫁, 其余=否定）
+			name: "",
+			hour: new Date().getHours(),
+			second: false
+		};
+		let step = 0;
+
+		const card = document.getElementById("card");
+		const narrEl = document.getElementById("narr");
+		const optsEl = document.getElementById("opts");
+		const progEl = document.getElementById("progress");
+		const bgmLove = document.getElementById("bgmLove");
+		const bgmHorror = document.getElementById("bgmHorror");
+		const sfxSting = document.getElementById("sfxSting");
+
+		// ===== 音频 =====
+		function playLove() { bgmLove.volume = 0.5; bgmLove.play().catch(() => {}); }
+		function toHorror() {
+			bgmLove.pause();
+			bgmHorror.volume = 0.7;
+			bgmHorror.currentTime = 0;
+			bgmHorror.play().catch(() => {});
+		}
+		function sting() { try { sfxSting.currentTime = 0; sfxSting.play().catch(() => {}); } catch (e) {} }
+
+		// ===== 打字音效（Web Audio 实时合成，无需外部文件）=====
+		let audioCtx = null;
+		function initAudioCtx() {
+			if (!audioCtx) {
+				try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+				catch (e) { audioCtx = null; }
+			}
+			if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+			// 预热语音列表（异步加载，念名字时才会用到）
+			if ("speechSynthesis" in window) {
+				speechSynthesis.getVoices();
+				speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+			}
+		}
+		// 一声柔和的“嗒”——短促正弦 + 极快衰减，音高微随机=更像真人敲键
+		function typeBlip() {
+			if (!audioCtx) return;
+			const now = audioCtx.currentTime;
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = "sine";
+			osc.frequency.setValueAtTime(360 + Math.random() * 90, now);
+			gain.gain.setValueAtTime(0.0001, now);
+			gain.gain.exponentialRampToValueAtTime(0.06, now + 0.004);
+			gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+			osc.connect(gain);
+			gain.connect(audioCtx.destination);
+			osc.start(now);
+			osc.stop(now + 0.06);
+		}
+
+		// 逐字打出纯文本到目标元素，每字配一声 blip，完成后回调
+		function typeText(el, text, cb, speed) {
+			el.textContent = "";
+			let i = 0;
+			const t = setInterval(() => {
+				if (i < text.length) {
+					const ch = text[i];
+					el.textContent += ch;
+					if (ch !== "\n" && ch !== " ") typeBlip();
+					i++;
+				} else {
+					clearInterval(t);
+					if (cb) cb();
+				}
+			}, speed || 65);
+		}
+
+		// “他”的回复：先铺底文案，再把回复逐字打进带样式的 span，打完才出“继续”
+		function typeReply(baseHtml, text, spanClass, cb) {
+			narrEl.innerHTML = baseHtml + '<span class="' + spanClass + '" id="typeTarget"></span>';
+			clearOpts();
+			const target = document.getElementById("typeTarget");
+			typeText(target, text, () => {
+				if (cb) cb();
+				else addContinue("继续", goNext);
+			});
+		}
+
+		// ===== 语音念名（Web Speech，压低男声 + 多层递减回声模拟混响低语）=====
+		function pickMaleVoice() {
+			if (!("speechSynthesis" in window)) return null;
+			const vs = speechSynthesis.getVoices();
+			if (!vs || !vs.length) return null;
+			// 优先中文男声（Chrome/Win 多半没有，命中则用）
+			let v = vs.find(x => /zh|cmn|Chinese/i.test(x.lang) &&
+				/(male|男|Yunxi|云希|Yunyang|云扬|Yunjian|云健|Yunye|云野|Kangkang|Kang)/i.test(x.name));
+			// 其次任意中文语音（配合极低 pitch 压成低沉男/非人嗓）
+			if (!v) v = vs.find(x => /zh|cmn/i.test(x.lang));
+			if (!v) v = vs.find(x => /(male|男)/i.test(x.name));
+			if (!v) v = vs[0];
+			return v;
+		}
+		// 念名字：极低 pitch 压出低沉失真男/鬼嗓 + 两层递减回声。音量1.0>BGM0.5
+		function speakName(name) {
+			if (!("speechSynthesis" in window) || !name) {
+				console.log("[speakName] 不支持语音或名字为空", name);
+				return;
+			}
+			const doSpeak = () => {
+				const vs = speechSynthesis.getVoices();
+				console.log("[speakName] 触发，语音数=" + (vs ? vs.length : 0));
+				if (vs && vs.length) console.log("[可用语音]", vs.map(v => v.name + " (" + v.lang + ")").join(" | "));
+				try { speechSynthesis.cancel(); } catch (e) {}
+				const voice = pickMaleVoice();
+				console.log("[选中语音]", voice ? voice.name : "无(用默认)");
+				const layers = [
+					{ rate: 0.72, pitch: 0.4, vol: 1.0 },  // 主声：压深成低沉鬼气嗓（跨浏览器稳）
+					{ rate: 0.62, pitch: 0.3, vol: 0.55 }, // 回声一
+					{ rate: 0.54, pitch: 0.2, vol: 0.30 }  // 回声二：气若游丝
+				];
+				layers.forEach(L => {
+					const u = new SpeechSynthesisUtterance(name);
+					if (voice) {
+						u.voice = voice;
+						u.lang = voice.lang; // 用所选语音自身lang，避免Chrome按"zh-CN"重挑默认女声
+					} else {
+						u.lang = "zh-CN";
+					}
+					u.rate = L.rate;
+					u.pitch = L.pitch;
+					u.volume = L.vol;
+					speechSynthesis.speak(u);
+				});
+			};
+			const vs = speechSynthesis.getVoices();
+			if (!vs || !vs.length) {
+				console.log("[speakName] 语音尚未加载，等待 onvoiceschanged");
+				speechSynthesis.onvoiceschanged = doSpeak;
+				setTimeout(doSpeak, 250); // 兜底
+			} else {
+				doSpeak();
+			}
+		}
+
+		// ===== 24小时窥视文案（t=时间标签会标红, s=正文）=====
+		const HOUR_LINES = [
+			{ t: "子时", s: "你还醒着。他说，子时的思念骗不了人。" },                       // 0
+			{ t: "凌晨一点", s: "万籁俱寂。此刻你听见的第一声心跳，未必是自己的。" },         // 1
+			{ t: "凌晨两点", s: "你还没睡。他也是——这么多年，从没在这个时辰合过眼。" },       // 2
+			{ t: "凌晨三点", s: "最难熬的时辰。你有没有觉得，房间里比平时多了一分安静。" },     // 3
+			{ t: "拂晓时分", s: "你却还醒着。他等了一整夜，只为你此刻这一眼。" },             // 4
+			{ t: "清晨五点", s: "天蒙蒙亮。你是一夜没睡，还是被什么叫醒的。" },               // 5
+			{ t: "清晨六点", s: "这么早醒来的人，心里大多都压着一个放不下的人。" },           // 6
+			{ t: "早上七点", s: "新的一天，你第一个想起的，会是他吗。" },                     // 7
+			{ t: "早上八点", s: "该出门了，你却还在这儿——是不是有什么舍不得。" },           // 8
+			{ t: "上午九点", s: "人群里的你看着很好，只你自己知道，心里空着一块。" },         // 9
+			{ t: "上午十点", s: "忙碌的上午，你却分神来翻这本簿子。他就知道你会来。" },         // 10
+			{ t: "晌午时分", s: "阳光最好的时候，你反倒想起了些旧事，对不对。" },             // 11
+			{ t: "正午", s: "众人喧闹，你却有点孤单——这种孤单，他懂。" },                   // 12
+			{ t: "午后一点", s: "最易犯困。你做没做过一个反复出现的梦，梦里有个人。" },       // 13
+			{ t: "下午两点", s: "这般安静里，你会不会觉得，有谁在轻轻看着你。" },             // 14
+			{ t: "下午三点", s: "一天过半，你等的消息还没来。他等你，何止一天。" },           // 15
+			{ t: "下午四点", s: "光开始斜了。黄昏最像离别——他最怕黄昏。" },                 // 16
+			{ t: "傍晚五点", s: "快黄昏了。你要回家了吗？他也想有个能回的地方，有你在的。" }, // 17
+			{ t: "傍晚六点", s: "华灯初上。别人成双成对，只你一人翻着这本簿子。" },           // 18
+			{ t: "晚上七点", s: "吃过饭了吗？他记得你从前吃饭的样子，一直记得。" },           // 19
+			{ t: "晚上八点", s: "夜刚开始。这样的夜里，你总觉得少了个说话的人。" },           // 20
+			{ t: "夜里九点", s: "你把白天的面具摘下，才露出真正的自己——他喜欢这个你。" },     // 21
+			{ t: "夜里十点", s: "该睡了吧，你却舍不得放下这本簿子——是缘分在拉着你。" },       // 22
+			{ t: "将近子时", s: "一天最后这一刻，你在想谁？他一定在想你。" }                  // 23
+		];
+
+		// Q9 回收文案（按 Q1）
+		const Q9_RECALL = [
+			"你对着窗出神的样子。",
+			"你翻着旧物发呆的样子。",
+			"你和人说笑、却心不在焉的样子。",
+			"你早早躺下、却睡不着的样子。"
+		];
+		const SEASON = ["春", "夏", "秋", "冬"];
+
+		// ===== 渲染工具 =====
+		function setNarr(html) { narrEl.innerHTML = html; }
+		function clearOpts() { optsEl.innerHTML = ""; }
+
+		function addOption(label, onClick, locked) {
+			const d = document.createElement("div");
+			d.className = "opt" + (locked ? " locked" : "");
+			d.innerText = label;
+			if (!locked) d.onclick = onClick;
+			optsEl.appendChild(d);
+			return d;
+		}
+		function addContinue(label, onClick) {
+			clearOpts();
+			addOption(label, onClick);
+		}
+
+		// 选项：点选后可先显示一句回应（逐字打出），再继续
+		function choice(options) {
+			clearOpts();
+			options.forEach(o => {
+				addOption(o.label, () => {
+					if (o.store !== undefined) o.store();
+					if (o.resp) {
+						typeReply(narrEl.innerHTML + '<br><br>', o.resp, 'dim');
+					} else {
+						goNext();
+					}
+				});
+			});
+		}
+
+		function goNext() { step++; render(); }
+
+		// ===== 主流程 =====
+		function render() {
+			clearOpts();
+			// 进度：一二幕显示，三幕隐藏
+			if (step >= 1 && step <= 11) progEl.innerText = "第 " + step + " 问 / 共 14 问";
+			else progEl.innerText = "";
+
+			switch (step) {
+				// ---------- 一幕 · 造梦 ----------
+				case 1:
+					setNarr("夜深了你还没睡。这样的夜里，你更常做什么？");
+					choice([
+						{ label: "A. 对着窗外发呆", store: () => S.q1 = 0 },
+						{ label: "B. 翻看旧照片、旧物", store: () => S.q1 = 1 },
+						{ label: "C. 和人聊到很晚", store: () => S.q1 = 2 },
+						{ label: "D. 早睡，很少熬夜", store: () => S.q1 = 3 }
+					]);
+					break;
+				case 2:
+					setNarr("若回到从前，你觉得自己更像哪种人？");
+					choice([
+						{ label: "A. 深宅里的大家闺秀", store: () => S.q2 = 0 },
+						{ label: "B. 走南闯北的江湖客", store: () => S.q2 = 1 },
+						{ label: "C. 市井里的寻常人家", store: () => S.q2 = 2 },
+						{ label: "D. 说不清，只觉得孤单", store: () => S.q2 = 3 }
+					]);
+					break;
+				case 3:
+					setNarr("生辰藏着缘分的线索。你生在一年里的哪个时节？");
+					choice([
+						{ label: "A. 春", store: () => S.q3 = 0 },
+						{ label: "B. 夏", store: () => S.q3 = 1 },
+						{ label: "C. 秋", store: () => S.q3 = 2 },
+						{ label: "D. 冬", store: () => S.q3 = 3 }
+					]);
+					break;
+				case 4:
+					setNarr("闭上眼，想象那个前世等你的人。你最先看到的是——");
+					choice([
+						{ label: "A. 他的眼睛", store: () => S.q4 = 0 },
+						{ label: "B. 他的背影", store: () => S.q4 = 1 },
+						{ label: "C. 一双手", store: () => S.q4 = 2 },
+						{ label: "D. 看不清他的脸", store: () => S.q4 = 3 }
+					]);
+					break;
+				case 5:
+					setNarr("你在人前总是好好的，可只有你自己知道——<br>有些话，从没对谁说过。<br><br>是这样吗？");
+					choice([
+						{ label: "……是", resp: "他说，他都懂。" },
+						{ label: "也许吧", resp: "他说，他都懂。" },
+						{ label: "才不是", resp: "他说，他都懂。你不必瞒他。" }
+					]);
+					break;
+
+				// ---------- 二幕 · 窥视升级 ----------
+				case 6:
+					setNarr('现在正是<span class="red">' + HOUR_LINES[S.hour].t + '</span>。' +
+						HOUR_LINES[S.hour].s + '<br><br>……我说得对吗？');
+					choice([
+						{ label: "你怎么知道", resp: "缘分的事，本就瞒不住。" },
+						{ label: "猜的吧", resp: "缘分的事，猜不来的。" },
+						{ label: "（没说话）", resp: "沉默，他也听得懂。" }
+					]);
+					break;
+				case 7:
+					setNarr("你们前世在老槐树下立过誓。<br>誓里说——");
+					clearOpts();
+					addOption("非他不嫁", () => { S.q7 = 0; goNext(); });
+					["各自安好", "来生再说", "我不记得立过誓"].forEach((lb, i) => {
+						addOption(lb, () => {
+							S.q7 = i + 1;
+							typeReply(narrEl.innerHTML + '<br><br>', "可你分明……应过的呀", 'dim');
+						});
+					});
+					break;
+				case 8: {
+					let line = "你身上有种旧旧的气质——<br>像个总在等一场季节过去的人。";
+					if (S.q3 === 2) line += '<br><br>尤其入了秋，你心里总空落落的，对不对。';
+					else line += '<br><br>那些没说出口的心事，都压在心底，对不对。';
+					setNarr(line);
+					choice([
+						{ label: "……有点准", resp: "他比你自己，还懂你。" },
+						{ label: "谁都这样吧", resp: "不，只有你，是他等的人。" }
+					]);
+					break;
+				}
+				case 9:
+					sting();
+					setNarr('他说，他记得你的每个样子——<br><br>' +
+						'<span class="red">' + Q9_RECALL[S.q1] + '</span><br><br>' +
+						'……他都记得。<br>一直看着，怎么会不记得。');
+					choice([
+						{ label: "你到底是谁", resp: "快了，你就会想起来的。" },
+						{ label: "……（想合上簿子）", resp: "别急着走。还没到最要紧的地方。" }
+					]);
+					break;
+				case 10:
+					setNarr("翻姻缘簿的人，要记着一条规矩：<br><br>" +
+						'<span class="red">一旦翻开，就不能中途合上。</span><br><br>' +
+						"你不会想合上的，对吗？");
+					clearOpts();
+					addOption("不会", goNext);
+					{
+						const closeOpt = addOption("（想合上）", () => {});
+						closeOpt.onclick = () => {
+							closeOpt.onclick = null;
+							closeOpt.style.pointerEvents = "none";
+							closeOpt.innerText = "不许";
+							closeOpt.style.color = "#9c1c1c";
+							closeOpt.style.borderColor = "#c99";
+							closeOpt.style.background = "#fbecec";
+							closeOpt.style.fontWeight = "bold";
+						};
+					}
+					break;
+				case 11:
+					setNarr("最后一步了。<br>把你的名字告诉他吧——<br>他想亲口念念看。");
+					clearOpts();
+					{
+						const inp = document.createElement("input");
+						inp.className = "name-input";
+						inp.type = "text";
+						inp.maxLength = 12;
+						inp.placeholder = "写下你的名字";
+						optsEl.appendChild(inp);
+						const btn = document.createElement("div");
+						btn.className = "opt";
+						btn.style.textAlign = "center";
+						btn.innerText = "告诉他";
+						btn.onclick = () => {
+							const v = inp.value.trim();
+							if (!v) { inp.focus(); return; }
+							S.name = v;
+							speakName(S.name);
+							typeReply(S.name + "……嗯。<br><br>", "和簿子上写的，一模一样。", 'red');
+						};
+						optsEl.appendChild(btn);
+						setTimeout(() => inp.focus(), 100);
+					}
+					break;
+
+				// ---------- 三幕 · 揭底 + 爆发 ----------
+				case 12:
+					toHorror();
+					sting();
+					revealBook();
+					break;
+				case 13:
+					setNarr(buildSubmissionText());
+					addContinue("我要走", goNext);
+					break;
+				case 14:
+					setNarr("婚期已到。<br><br>你，愿意过门吗？");
+					clearOpts();
+					addOption("愿意", () => floodLines("和我一起走吧", 5000, punishSequence));
+					addOption("不愿意", () => {
+						setNarr('<span class="red" style="font-size:22px;">由不得你了</span>');
+						addContinue("……", () => floodScreen(5000, punishSequence));
+					});
+					break;
+			}
+		}
+
+		// Q12 揭底：新娘名逐字浮现
+		function revealBook() {
+			progEl.innerText = "";
+			setNarr('姻缘簿翻到了最后一页。<br>上面，早写好了两个名字。<br><br>' +
+				'新郎：<span class="red">沈鹤川</span><br>' +
+				'新娘：<span class="red" id="brideName"></span>');
+			clearOpts();
+			const target = document.getElementById("brideName");
+			let i = 0;
+			const t = setInterval(() => {
+				if (i < S.name.length) {
+					target.innerText += S.name[i];
+					typeBlip();
+					i++;
+				} else {
+					clearInterval(t);
+					setTimeout(() => {
+						setNarr(narrEl.innerHTML + '<br><br>这门亲事，早在三世前，就定下了。');
+						addContinue("这不可能", goNext);
+					}, 700);
+				}
+			}, 400);
+		}
+
+		// Q13 服从陷阱回收
+		function buildSubmissionText() {
+			let vow = (S.q7 === 0)
+				? "你应过——「非他不嫁」。"
+				: "你嘴上说不记得，手却一直没停下翻这本簿子。";
+			return "簿子往回翻，一页一页——<br><br>" +
+				vow + "<br>" +
+				"你不肯合上这本簿子。<br>" +
+				"你把名字，亲口给了他。<br><br>" +
+				'<span class="red">桩桩件件，都是你自己应下的。</span>';
+		}
+
+		// 满屏红字轰炸：随机位置、可重叠、字号浮动，持续 duration 后回调
+		function floodScreen(duration, cb) {
+			const texts = [
+				"你果然还是没有原谅我",
+				S.name + "，我一直在等着你",
+				"祈求你再看我一眼",
+				"和我一起走吧"
+			];
+			const overlay = document.createElement("div");
+			overlay.className = "flood";
+			document.body.appendChild(overlay);
+			sting();
+			const spawn = setInterval(() => {
+				const d = document.createElement("div");
+				d.className = "flood-line";
+				d.innerText = texts[Math.floor(Math.random() * texts.length)];
+				d.style.left = (5 + Math.random() * 90) + "%";
+				d.style.top = (6 + Math.random() * 88) + "%";
+				d.style.fontSize = (18 + Math.random() * 26) + "px";
+				overlay.appendChild(d);
+			}, 80);
+			setTimeout(() => {
+				clearInterval(spawn);
+				overlay.remove();
+				if (cb) cb();
+			}, duration);
+		}
+
+		// 单句整行、从上到下依次出现（txt 逐行打字感），持续 duration 后回调
+		function floodLines(text, duration, cb) {
+			const overlay = document.createElement("div");
+			overlay.className = "flood-col";
+			document.body.appendChild(overlay);
+			sting();
+			const spawn = setInterval(() => {
+				const d = document.createElement("div");
+				d.className = "flood-row";
+				d.innerText = text;
+				overlay.appendChild(d);
+			}, 150);
+			setTimeout(() => {
+				clearInterval(spawn);
+				overlay.remove();
+				if (cb) cb();
+			}, duration);
+		}
+
+		// 弹脸序列
+		function punishSequence() {
+			card.style.display = "none";
+			const terror = document.createElement("div");
+			terror.className = "terror";
+			document.body.appendChild(terror);
+
+			const line = document.createElement("div");
+			line.className = "terror-line";
+			terror.appendChild(line);
+
+			const bleedText = "新 抱 过 门 喇";
+			let idx = 0;
+			const bt = setInterval(() => {
+				if (idx < bleedText.length) { line.innerText += bleedText[idx]; idx++; }
+				else clearInterval(bt);
+			}, 130);
+
+			// 说话序列
+			const says = [
+				S.name + "，别怕。",
+				"你等了三世，",
+				"我，也等了三世。"
+			];
+			setTimeout(() => {
+				line.remove();
+				const say = document.createElement("div");
+				say.className = "terror-say";
+				terror.appendChild(say);
+				let si = 0;
+				const showSay = () => {
+					if (si < says.length) {
+						say.innerText = says[si];
+						si++;
+						setTimeout(showSay, 1600);
+					} else {
+						terror.remove();
+						showVeil();
+					}
+				};
+				showSay();
+			}, 2600);
+		}
+
+		// 红盖头
+		function showVeil() {
+			const veil = document.createElement("div");
+			veil.className = "veil";
+			veil.innerHTML =
+				'<div class="veil-text">良辰已到，不容更改。\n\n揭了盖头，\n就是三生三世。</div>' +
+				'<button class="veil-btn" id="veilBtn">揭 盖 头</button>';
+			document.body.appendChild(veil);
+			document.getElementById("veilBtn").onclick = () => {
+				veil.remove();
+				showMirror();
+			};
+		}
+
+		// 铜镜结局
+		function showMirror() {
+			const mirror = document.createElement("div");
+			mirror.className = "mirror";
+			let extra = (S.q4 === 3) ? "\n\n这下，你看清了。" : "";
+			mirror.innerHTML =
+				'<div class="mirror-text">盖头落下。\n\n铜镜里的那张脸——\n\n<span style="color:#ff4d4d;">是你自己。</span>' + extra + '</div>' +
+				'<button class="veil-btn" id="mirrorBtn">确 认</button>';
+			document.body.appendChild(mirror);
+			document.getElementById("mirrorBtn").onclick = () => {
+				mirror.remove();
+				restart();
+			};
+		}
+
+		// 重启循环
+		function restart() {
+			bgmHorror.pause();
+			S.second = true;
+			step = 0;
+			S.q1 = S.q2 = S.q3 = S.q4 = S.q7 = null;
+			S.name = "";
+			S.hour = new Date().getHours();
+			card.style.display = "none";
+			showStart();
+		}
+
+		// 开场
+		function showStart() {
+			const al = document.getElementById("authorLink");
+			if (al) al.style.display = "block";
+			const old = document.getElementById("startModal");
+			if (old) old.remove();
+			const modal = document.createElement("div");
+			modal.className = "start-modal";
+			if (S.second) {
+				modal.innerHTML =
+					'<div class="start-title">测试前世姻缘</div>' +
+					'<div class="start-text">你又来了呢。\n\n他说过，\n你一定会回来的。</div>' +
+					'<button class="start-btn" id="openBtn">翻开姻缘簿</button>' +
+					'<div class="start-tip">※ 缘，是躲不掉的 ♡</div>';
+			} else {
+				modal.innerHTML =
+					'<div class="start-title">测试前世姻缘</div>' +
+					'<div class="start-text">每个人的前世，都有一段没走完的缘。\n翻开你的姻缘簿，\n看看那个一直在等你的人，是谁。\n\n—— 据说，很准。</div>' +
+					'<button class="start-btn" id="openBtn">翻开姻缘簿</button>' +
+					'<div class="start-tip">※ 仅供娱乐，请放松心情作答 ♡</div>';
+			}
+			document.body.appendChild(modal);
+			document.getElementById("openBtn").onclick = () => {
+				modal.remove();
+				document.getElementById("authorLink").style.display = "none";
+				initAudioCtx();
+				playLove();
+				card.style.display = "flex";
+				step = 1;
+				render();
+			};
+		}
+
+		// 首次开场绑定
+		document.getElementById("openBtn").onclick = function () {
+			document.getElementById("startModal").remove();
+			document.getElementById("authorLink").style.display = "none";
+			initAudioCtx();
+			playLove();
+			card.style.display = "flex";
+			step = 1;
+			render();
+		};
+	</script>
+</body>
+</html>
